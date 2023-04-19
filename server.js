@@ -1,16 +1,28 @@
 var express = require('express');
 var multer = require('multer');
 var cors = require('cors');
-
 var app = express();
+const Images = require("./controllers/ImageController");
 
 // Middleware to enable CORS .
 app.use(cors());
 
-// Root path
-app.get('/', function (req, res) {
-  res.sendFile(__dirname + '/index.html');
-})
+require("./routes/ImageRoutes")(app);
+
+const db = require("./models");
+db.mongoose
+  .connect(db.url, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => {
+    console.log("Connected to the database!");
+  })
+  .catch(err => {
+    console.log("Cannot connect to the database!", err);
+    process.exit();
+  });
+
 
 // ---------------------
 // Upload
@@ -27,13 +39,17 @@ const storage = multer.diskStorage({
 });
 
 // Multer for handling multipart/form-data
-const uploadMiddleware = multer({ storage: storage }).array('file',500000)
+const uploadMiddleware = multer({ storage: storage }).single('file',500000)
 
 // Upload path
 app.post('/api/files/upload', uploadMiddleware, function (req, res) {
+  Images.create(req.file?.filename);
+  // console.log('object :>> ', req.file?.filename);
   res.json({ message: `File ${req.file?.filename} uploaded successfully!` });
 });
 
-app.listen(3000, function () {
-  console.log('Server is running on port 3000');
+
+
+app.listen(8080, function () {
+  console.log('Server is running on port 8080');
 });  
