@@ -2,6 +2,9 @@ var express = require('express');
 var multer = require('multer');
 var cors = require('cors');
 var app = express();
+var path = require('path')
+
+
 const Images = require("./controllers/ImageController");
 
 // Middleware to enable CORS .
@@ -33,7 +36,7 @@ const storage = multer.diskStorage({
     cb(null, './ouruploads')
   },
   filename: function (req, file, cb) {
-    const fileName = Date.now() + '-' + file.originalname
+    const fileName = Date.now() +path.extname(file.originalname) 
     cb(null, fileName)
   }
 });
